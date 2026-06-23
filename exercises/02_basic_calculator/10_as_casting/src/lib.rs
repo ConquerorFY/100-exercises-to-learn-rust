@@ -6,7 +6,7 @@ mod tests {
 
     #[test]
     fn u16_to_u32() {
-        let v: u32 = todo!();
+        let v: u32 = 47u32;
         assert_eq!(47u16 as u32, v);
     }
 
@@ -20,18 +20,22 @@ mod tests {
         // catch this at compile time.
         #[allow(overflowing_literals)]
         let x = { 255 as i8 };
+        // resolved to -1
+        //  - truncation discard bits > 8 bits, but since 255 has 8 bits (11111111), all bits retained;
+        //  - since i8 will perform 2 complements and get -1
+        //      - 111111111 --> 00000000 --> 00000001 (+1) --> since 1st bit (from right) is 1, means -ve 000000001 => -1 as result
 
         // You could solve this by using exactly the same expression as above,
         // but that would defeat the purpose of the exercise. Instead, use a genuine
         // `i8` value that is equivalent to `255` when converted to `u8`.
-        let y: i8 = todo!();
+        let y: i8 = -1i8;
 
         assert_eq!(x, y);
     }
 
     #[test]
     fn bool_to_u8() {
-        let v: u8 = todo!();
+        let v: u8 = 1u8;
         assert_eq!(true as u8, v);
     }
 }
