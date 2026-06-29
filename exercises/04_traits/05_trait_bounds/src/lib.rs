@@ -6,7 +6,11 @@
 // collections (e.g. BTreeMap).
 
 /// Return the minimum of two values.
-pub fn min<T>(left: T, right: T) -> T {
+// pub fn min<T: std::cmp::PartialOrd>(left: T, right: T) -> T {
+pub fn min<T>(left: T, right: T) -> T
+where
+    T: std::cmp::PartialOrd,
+{
     if left <= right {
         left
     } else {
