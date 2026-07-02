@@ -38,7 +38,15 @@ impl Ticket {
         }
     }
     pub fn assigned_to(&self) -> &str {
-        todo!()
+        match &self.status {
+            // 1. Use 'panic!' to satisfy the requirement
+            Status::ToDo | Status::Done => {
+                panic!("Only `In-Progress` tickets can be assigned to someone")
+            }
+            // 2. Use '&self.status' in the match and 'ref assigned_to' (or just match the field)
+            // By matching on '&self.status', 'assigned_to' becomes a &String
+            Status::InProgress { assigned_to } => assigned_to,
+        }
     }
 }
 
