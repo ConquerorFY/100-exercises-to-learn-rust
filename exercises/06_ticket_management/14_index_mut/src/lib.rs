@@ -1,6 +1,6 @@
 // TODO: Implement `IndexMut<&TicketId>` and `IndexMut<TicketId>` for `TicketStore`.
 
-use std::ops::Index;
+use std::ops::{Index, IndexMut};
 use ticket_fields::{TicketDescription, TicketTitle};
 
 #[derive(Clone)]
@@ -54,8 +54,33 @@ impl TicketStore {
         id
     }
 
+    // .iter()     : Yields immutable references (&T).
+    //               Safe to use with pattern matching (|&t|) because it
+    //               only copies references, not the underlying data.
+    //
+    // .iter_mut() : Yields mutable references (&mut T).
+    //               Must NOT be destructured (|&t|) because that attempts to
+    //               move data out of the reference, which is prohibited.
+    //               Always use (|t|) and access fields via auto-dereferencing.
+
+    // =========================================================================
+    // Iterator Pattern Summary
+    // =========================================================================
+    // | Iterator      | Yields    | Closure Pattern | Accessing Data          |
+    // |---------------|-----------|-----------------|-------------------------|
+    // | .iter()       | &T        | |&t| or |t|     | t.field                 |
+    // | .iter_mut()   | &mut T    | |t|             | *t (edit) or t.field    |
+    // =========================================================================
+    //
+    // NOTE: Always prefer |t| for both iterators to avoid illegal moves
+    // when working with types that do not implement the Copy trait.
+
     pub fn get(&self, id: TicketId) -> Option<&Ticket> {
         self.tickets.iter().find(|&t| t.id == id)
+    }
+
+    pub fn get_mut(&mut self, id: TicketId) -> Option<&mut Ticket> {
+        self.tickets.iter_mut().find(|t| t.id == id)
     }
 }
 
@@ -67,6 +92,12 @@ impl Index<TicketId> for TicketStore {
     }
 }
 
+impl IndexMut<TicketId> for TicketStore {
+    fn index_mut(&mut self, index: TicketId) -> &mut Self::Output {
+        self.get_mut(index).unwrap()
+    }
+}
+
 impl Index<&TicketId> for TicketStore {
     type Output = Ticket;
 
@@ -74,6 +105,25 @@ impl Index<&TicketId> for TicketStore {
         &self[*index]
     }
 }
+
+impl IndexMut<&TicketId> for TicketStore {
+    fn index_mut(&mut self, index: &TicketId) -> &mut Self::Output {
+        self.get_mut(*index).unwrap()
+    }
+}
+
+// Solution (from GitHub):
+// impl IndexMut<TicketId> for TicketStore {
+//     fn index_mut(&mut self, index: TicketId) -> &mut Self::Output {
+//         self.tickets.iter_mut().find(|t| t.id == index).unwrap()
+//     }
+// }
+
+// impl IndexMut<&TicketId> for TicketStore {
+//     fn index_mut(&mut self, index: &TicketId) -> &mut Self::Output {
+//         &mut self[*index]
+//     }
+// }
 
 #[cfg(test)]
 mod tests {
