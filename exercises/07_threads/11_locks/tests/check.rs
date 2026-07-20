@@ -14,6 +14,7 @@ fn works() {
     let ticket = client.get(ticket_id).unwrap().unwrap();
     {
         let mut ticket = ticket.lock().unwrap();
+        // let mut ticket = (*ticket).lock().unwrap(); --> should be like this since Arc returns a shared reference (i guess Rust compiler is smart enough to infer auto to the one above)
         assert_eq!(ticket_id, ticket.id);
         assert_eq!(ticket.status, Status::ToDo);
         assert_eq!(ticket.title, draft.title);
@@ -24,7 +25,7 @@ fn works() {
 
     let ticket = client.get(ticket_id).unwrap().unwrap();
     {
-        let ticket = ticket.lock().unwrap();
+        let mut ticket = ticket.lock().unwrap();
         assert_eq!(ticket_id, ticket.id);
         assert_eq!(ticket.status, Status::InProgress);
     }
