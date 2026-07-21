@@ -11,7 +11,11 @@ use tokio::net::TcpListener;
 // - `tokio::net::TcpStream::split` to obtain a reader and a writer from the socket
 // - `tokio::io::copy` to copy data from the reader to the writer
 pub async fn echo(listener: TcpListener) -> Result<(), anyhow::Error> {
-    todo!()
+    loop {
+        let (mut socket, _) = listener.accept().await?; // By adding ?, Rust automatically unwraps the Ok variant to give you (TcpStream, SocketAddr), or it catches the Err, converts it into an anyhow::Error, and exits the function early.
+        let (mut reader, mut writer) = socket.split();
+        tokio::io::copy(&mut reader, &mut writer).await?; // tokio::io::copy reads everything the client sends and immediately writes it back. Crucially, it blocks the loop until the client finishes sending data and closes their write half (which happens when the test calls writer.shutdown().await.unwrap()).
+    }
 }
 
 #[cfg(test)]
